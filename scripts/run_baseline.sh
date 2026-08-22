@@ -22,7 +22,7 @@ echo "Conda Environment: $CONDA_ENV_NAME"
 echo "=========================================="
 
 "$CONDA_PYTHON" -m "$MODULE_NAME" \
-    --model_name "meta-llama/Llama-2-13b-chat-hf" \
+    --model_name "allenai/open-instruct-pythia-6.9b-tulu" \
     --dataset_name "UCL-DARK/ludwig" \
     --max_length 512
 
