@@ -8,7 +8,7 @@ CONDA_PYTHON="/home/pasa00007/.conda/envs/agentic-eval/bin/python"
 MODULE_NAME="experiments.baseline"
 
 # Hugging Face cache on scratch
-export HF_HOME="/scratch/compuling/HF_DATA"
+export HF_HOME="/scratch/compuling/pasa00007/HF_DATA"
 export HF_DATASETS_CACHE="$HF_HOME/datasets"
 export HUGGINGFACE_HUB_CACHE="$HF_HOME/hub"
 
