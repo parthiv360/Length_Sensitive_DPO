@@ -23,7 +23,7 @@ echo "=========================================="
 
 "$CONDA_PYTHON" -m "$MODULE_NAME" \
     --model_name "meta-llama/Llama-2-13b-chat-hf" \
-    --dataset_name "allenai/social_i_qa" \
+    --dataset_name "UCL-DARK/ludwig" \
     --max_length 512
 
 echo "=========================================="
