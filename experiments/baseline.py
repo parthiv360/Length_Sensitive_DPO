@@ -44,6 +44,13 @@ class Baseline:
             "allenai/social_i_qa",
             revision="f96e243fd5228e9431b13b9f3bba849a8ec1d013",
         )
+        elif self.dataset_name == "UCL-DARK/ludwig":
+            logger.info("Loading LUDWIG dataset from Parquet conversion")
+
+            self.dataset = load_dataset(
+                "UCL-DARK/ludwig",
+                revision="refs/convert/parquet",
+            )
         else:
             self.dataset = load_dataset(self.dataset_name, cache_dir="/scratch/compuling/HF_DATA/datasets")
         logger.info("Dataset loaded successfully")
