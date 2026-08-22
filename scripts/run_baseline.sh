@@ -3,7 +3,7 @@
 SCRIPT_NAME="experiments/baseline.py"
 CONDA_ENV_NAME="base"  # Use the base environment
 
-PROJECT_DIR="/home/pasa00007/Seminars/Length_Sensitive_DPO/" 
+PROJECT_DIR="/home/pasa00007/Seminar/Length_Sensitive_DPO/" 
 CONDA_PYTHON="/home/pasa00007/.conda/envs/agentic-eval/bin/python"
 MODULE_NAME="experiments.baseline"
 
