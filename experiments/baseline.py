@@ -40,32 +40,10 @@ class Baseline:
 
         logger.info("Loading dataset: %s", self.dataset_name)
         if self.dataset_name == "allenai/social_i_qa":
-            cache_dir = "/scratch/compuling/HF_DATA/datasets"
-
-            train_file = hf_hub_download(
-                repo_id="allenai/social_i_qa",
-                repo_type="dataset",
-                filename="data/train-00000-of-00001.parquet",
-                revision="refs/convert/parquet",
-                cache_dir=cache_dir,
-            )
-
-            validation_file = hf_hub_download(
-                repo_id="allenai/social_i_qa",
-                repo_type="dataset",
-                filename="data/validation-00000-of-00001.parquet",
-                revision="refs/convert/parquet",
-                cache_dir=cache_dir,
-            )
-
             self.dataset = load_dataset(
-                "parquet",
-                data_files={
-                    "train": train_file,
-                    "validation": validation_file,
-                },
-                cache_dir=cache_dir,
-            )
+            "allenai/social_i_qa",
+            revision="f96e243fd5228e9431b13b9f3bba849a8ec1d013",
+        )
         else:
             self.dataset = load_dataset(self.dataset_name, cache_dir="/scratch/compuling/HF_DATA/datasets")
         logger.info("Dataset loaded successfully")
