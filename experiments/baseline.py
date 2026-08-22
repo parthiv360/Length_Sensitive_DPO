@@ -38,7 +38,17 @@ class Baseline:
         """
 
         logger.info("Loading dataset: %s", self.dataset_name)
-        self.dataset = load_dataset(self.dataset_name)
+        if self.dataset_name == "allenai/social_i_qa":
+            logger.info("Loading Social-IQA dataset")
+            self.dataset = load_dataset(
+                "parquet",
+                data_files={
+                    "train": "https://huggingface.co/datasets/allenai/social_i_qa/resolve/refs%2Fconvert%2Fparquet/data/train-00000-of-00001.parquet",
+                    "validation": "https://huggingface.co/datasets/allenai/social_i_qa/resolve/refs%2Fconvert%2Fparquet/data/validation-00000-of-00001.parquet",
+                },
+                cache_dir="/scratch/compuling/HF_DATA/datasets")
+        else:
+            self.dataset = load_dataset(self.dataset_name, cache_dir="/scratch/compuling/HF_DATA/datasets")
         logger.info("Dataset loaded successfully")
         
 
