@@ -71,7 +71,7 @@ class Baseline:
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--model_name", type=str, default="meta-llama/Llama-2-13b-chat-hf")
-    parser.add_argument("--dataset_name", type=str, default="imdb")
+    parser.add_argument("--dataset_name", type=str, default="allenai/social_i_qa")
     parser.add_argument("--max_length", type=int, default=512)
 
     args = parser.parse_args()
