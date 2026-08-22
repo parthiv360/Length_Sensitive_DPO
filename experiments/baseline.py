@@ -1,5 +1,6 @@
 from datasets import load_dataset
 from transformers import AutoTokenizer, AutoModelForCausalLM
+from huggingface_hub import hf_hub_download
 
 import argparse
 import logging
@@ -39,19 +40,31 @@ class Baseline:
 
         logger.info("Loading dataset: %s", self.dataset_name)
         if self.dataset_name == "allenai/social_i_qa":
-            logger.info("Loading Social-IQA dataset")
-            base_url = (
-                "https://huggingface.co/datasets/allenai/social_i_qa"
-                "/resolve/refs%2Fconvert%2Fparquet/data"
+            cache_dir = "/scratch/compuling/HF_DATA/datasets"
+
+            train_file = hf_hub_download(
+                repo_id="allenai/social_i_qa",
+                repo_type="dataset",
+                filename="data/train-00000-of-00001.parquet",
+                revision="refs/convert/parquet",
+                cache_dir=cache_dir,
+            )
+
+            validation_file = hf_hub_download(
+                repo_id="allenai/social_i_qa",
+                repo_type="dataset",
+                filename="data/validation-00000-of-00001.parquet",
+                revision="refs/convert/parquet",
+                cache_dir=cache_dir,
             )
 
             self.dataset = load_dataset(
                 "parquet",
                 data_files={
-                    "train": f"{base_url}/train-00000-of-00001.parquet",
-                    "validation": f"{base_url}/validation-00000-of-00001.parquet",
+                    "train": train_file,
+                    "validation": validation_file,
                 },
-                streaming=True,
+                cache_dir=cache_dir,
             )
         else:
             self.dataset = load_dataset(self.dataset_name, cache_dir="/scratch/compuling/HF_DATA/datasets")
