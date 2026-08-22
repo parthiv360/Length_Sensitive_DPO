@@ -1,0 +1,5 @@
+*.sub
+*.pyc
+logs/
+run_logs/
+.DS_Store
