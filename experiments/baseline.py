@@ -42,9 +42,11 @@ class Baseline:
 
         logger.info("Loading dataset: %s", self.dataset_name)
         if self.dataset_name == "allenai/social_i_qa":
+            logger.info("Loading SocialIQA dataset from Parquet conversion")
+            
             self.dataset = load_dataset(
             "allenai/social_i_qa",
-            revision="f96e243fd5228e9431b13b9f3bba849a8ec1d013",
+            revision="refs/convert/parquet",
         )
         elif self.dataset_name == "UCL-DARK/ludwig":
             logger.info("Loading LUDWIG dataset from Parquet conversion")
