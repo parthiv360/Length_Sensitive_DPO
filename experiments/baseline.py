@@ -54,7 +54,7 @@ class Baseline:
                 revision="refs/convert/parquet",
             )
         else:
-            self.dataset = load_dataset(self.dataset_name, cache_dir="/scratch/compuling/HF_DATA/datasets")
+            self.dataset = load_dataset(self.dataset_name, cache_dir="/scratch/compuling/pasa00007/HF_DATA/datasets")
         logger.info("Dataset loaded successfully")
         
 
