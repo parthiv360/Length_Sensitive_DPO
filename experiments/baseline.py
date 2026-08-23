@@ -4,12 +4,14 @@ from huggingface_hub import hf_hub_download
 
 import argparse
 import logging
+import os
+from datetime import datetime
 from pathlib import Path
 
 LOG_DIR = Path(__file__).resolve().parent.parent / "run_logs"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 
-LOG_FILE = LOG_DIR / "baseline.log"
+LOG_FILE = LOG_DIR / f"baseline_{datetime.now():%Y%m%d_%H%M%S_%f}_{os.getpid()}.log"
 
 logging.basicConfig(
     level=logging.INFO,

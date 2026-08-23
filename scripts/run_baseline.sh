@@ -23,7 +23,7 @@ echo "=========================================="
 
 "$CONDA_PYTHON" -m "$MODULE_NAME" \
     --model_name "allenai/open-instruct-pythia-6.9b-tulu" \
-    --dataset_name "UCL-DARK/ludwig" \
+    --dataset_name "cfilt/PUB" \
     --max_length 512
 
 echo "=========================================="
