@@ -8,6 +8,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 import argparse
+import tqdm
 
 LOG_DIR = Path(__file__).resolve().parent.parent / "run_logs"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
@@ -42,10 +43,17 @@ class MCQAEvaluator:
         logger.info("Loading tokenizer and model: %s", self.model_name)
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         
-        self.model = AutoModelForCausalLM.from_pretrained(self.model_name, 
-                                                          dtype=torch.float16,
-                                                          device_map="auto")
-        self.model.to(self.device)
+        model_dtype = torch.float16 if torch.cuda.is_available() else torch.float32
+
+        self.model = AutoModelForCausalLM.from_pretrained(
+            self.model_name,
+            torch_dtype=model_dtype,
+            device_map="auto" if torch.cuda.is_available() else None,
+        )
+
+        if not torch.cuda.is_available():
+            self.model.to(self.device)
+
         self.model.eval()
         logger.info("Model and tokenizer loaded successfully")
 
@@ -92,10 +100,37 @@ class MCQAEvaluator:
         prediction = max(range(len(choices)), key=lambda i: scores[i])
         return prediction, scores
 
+    def build_ludwig_prompt(self, data):
+        return (
+            f"Utterance: {data['utterance']}\n"
+            f"Response: {data['response']}\n"
+            f"Does the response imply that the answer to the utterance is yes or no?\n"
+            f"Answer:"
+        )
+
+    def ludwig_evaluate(self, dataset):
+        correct = 0
+        total = len(dataset)
+        logger.info("Total evaluation data: %d", total)
+        
+        for data in tqdm(dataset, total=total, desc="Evaluating on Ludwig"):
+            prompt = self.build_ludwig_prompt(data)
+            choices = ["yes","no"]
+            prediction, score = self.predict(prompt, choices)
+            predicted_ans = choices[prediction]
+            gt = data["implicature"].lower()
+            if predicted_ans == gt:
+                correct +=1
+
+        accuracy = correct/total if total else 0.0
+        logger.info("LUDWIG accuracy: %.2f%%",accuracy * 100,)
+
+        return accuracy
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--model-name", type=str, default="allenai/open-instruct-pythia-6.9b-tulu")
-    parser.add_argument("--dataset-name", type=str, default="allenai/social_i_qa")
+    parser.add_argument("--dataset-name", type=str, default="UCL-DARK/ludwig")
     args = parser.parse_args()
 
     baseline = Baseline(model_name=args.model_name, dataset_name=args.dataset_name)
@@ -103,16 +138,7 @@ if __name__ == "__main__":
     dataset = baseline.dataset
     evaluator = MCQAEvaluator(model_name=args.model_name)
     evaluator.load_model()
-    # prompt = """Question: What is the capital of India?
-    # Answer:"""
 
-    # choices = [
-    #     " Delhi",
-    #     " London",
-    #     " Berlin",
-    # ]
-    # prediction, scores = evaluator.predict(prompt, choices)
-    # logger.info("Prediction: %s", choices[prediction])
-    # logger.info("Scores: %s", scores)
-    print("Dataset: ", args.dataset_name)
-    print("Sample 1:", dataset["test"][0])
+    if args.dataset_name == "UCL-DARK/ludwig":
+        logger.info("MCQA Evaluation on the ludwig dataset")
+        evaluator.ludwig_evaluate(dataset)
