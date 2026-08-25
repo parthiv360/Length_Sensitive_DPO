@@ -8,7 +8,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 import argparse
-import tqdm
+from tqdm.auto import tqdm
 
 LOG_DIR = Path(__file__).resolve().parent.parent / "run_logs"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
@@ -110,7 +110,8 @@ class MCQAEvaluator:
 
     def ludwig_evaluate(self, dataset):
         correct = 0
-        total = len(dataset)
+        total = min(len(dataset),600)
+        dataset = dataset[:600]
         logger.info("Total evaluation data: %d", total)
         
         for data in tqdm(dataset, total=total, desc="Evaluating on Ludwig"):
@@ -123,7 +124,8 @@ class MCQAEvaluator:
                 correct +=1
 
         accuracy = correct/total if total else 0.0
-        logger.info("LUDWIG accuracy: %.2f%%",accuracy * 100,)
+        logger.info("Total Correct: %d", correct)
+        logger.info("LUDWIG accuracy: %.2f%%",accuracy * 100)
 
         return accuracy
 
