@@ -141,4 +141,4 @@ if __name__ == "__main__":
 
     if args.dataset_name == "UCL-DARK/ludwig":
         logger.info("MCQA Evaluation on the ludwig dataset")
-        evaluator.ludwig_evaluate(dataset)
+        evaluator.ludwig_evaluate(dataset["test"])
