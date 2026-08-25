@@ -21,7 +21,9 @@ echo "Script: $SCRIPT_NAME"
 echo "Conda Environment: $CONDA_ENV_NAME"
 echo "=========================================="
 
-"$CONDA_PYTHON" -m "$MODULE_NAME" 
+"$CONDA_PYTHON" -m "$MODULE_NAME" \
+    --model-name "allenai/open-instruct-pythia-6.9b-tulu" \
+    --dataset-name "UCL-DARK/ludwig"
 
 echo "=========================================="
 echo "MCQA Execution Completed"

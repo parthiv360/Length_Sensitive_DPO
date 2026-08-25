@@ -1,11 +1,13 @@
 import torch
 
+from experiments.baseline import Baseline
 from transformers import AutoTokenizer, AutoModelForCausalLM
 
 import logging
 import os
 from datetime import datetime
 from pathlib import Path
+import argparse
 
 LOG_DIR = Path(__file__).resolve().parent.parent / "run_logs"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
@@ -41,7 +43,7 @@ class MCQAEvaluator:
         self.tokenizer = AutoTokenizer.from_pretrained(self.model_name)
         
         self.model = AutoModelForCausalLM.from_pretrained(self.model_name, 
-                                                          torch_dtype=torch.float16,
+                                                          dtype=torch.float16,
                                                           device_map="auto")
         self.model.to(self.device)
         self.model.eval()
@@ -91,16 +93,26 @@ class MCQAEvaluator:
         return prediction, scores
 
 if __name__ == "__main__":
-    evaluator = MCQAEvaluator(model_name="allenai/open-instruct-pythia-6.9b-tulu")
-    evaluator.load_model()
-    prompt = """Question: What is the capital of India?
-    Answer:"""
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--model-name", type=str, default="allenai/open-instruct-pythia-6.9b-tulu")
+    parser.add_argument("--dataset-name", type=str, default="allenai/social_i_qa")
+    args = parser.parse_args()
 
-    choices = [
-        " Delhi",
-        " London",
-        " Berlin",
-    ]
-    prediction, scores = evaluator.predict(prompt, choices)
-    logger.info("Prediction: %s", choices[prediction])
-    logger.info("Scores: %s", scores)
+    baseline = Baseline(model_name=args.model_name, dataset_name=args.dataset_name)
+    baseline.load_dataset()
+    dataset = baseline.dataset
+    evaluator = MCQAEvaluator(model_name=args.model_name)
+    evaluator.load_model()
+    # prompt = """Question: What is the capital of India?
+    # Answer:"""
+
+    # choices = [
+    #     " Delhi",
+    #     " London",
+    #     " Berlin",
+    # ]
+    # prediction, scores = evaluator.predict(prompt, choices)
+    # logger.info("Prediction: %s", choices[prediction])
+    # logger.info("Scores: %s", scores)
+    print("Dataset: ", args.dataset_name)
+    print("Sample 1:", dataset["test"][0])
