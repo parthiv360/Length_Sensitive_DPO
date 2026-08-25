@@ -111,7 +111,7 @@ class MCQAEvaluator:
     def ludwig_evaluate(self, dataset):
         correct = 0
         total = min(len(dataset),600)
-        dataset = dataset[:600]
+        dataset = dataset.select(range(total))
         logger.info("Total evaluation data: %d", total)
         
         for data in tqdm(dataset, total=total, desc="Evaluating on Ludwig"):
