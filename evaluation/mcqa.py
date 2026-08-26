@@ -160,7 +160,37 @@ class MCQAEvaluator:
 
         return accuracy
 
+    def build_social_iqa_prompt(self,data):
+        return (
+            f"Context: {data['context']}\n"
+            f"Question: {data['question']}\n"
+            f"Answer choices:\n"
+            f"1. {data['answerA']}\n"
+            f"2. {data['answerB']}\n"
+            f"3. {data['answerC']}\n"
+            f"Answer:"
+        )
 
+    def social_iqa_evaluate(self,dataset):
+        correct = 0
+        total = len(dataset)
+        choices = ["1","2","3"]
+        logger.info("Total Evaluation Data %d", total)
+
+        for data in tqdm(dataset, total=total, desc="Evaluating Social-IQA"):
+            prompt = self.build_social_iqa_prompt(data)
+            prediction, score = self.predict(prompt,choices)
+            predicted_ans = int(choices[prediction])
+            gt = int(data["label"])
+
+            if predicted_ans == gt :
+                correct +=1
+
+        accuracy = correct/total if total else 0.0
+        logger.info("Total Correct: %d", correct)
+        logger.info("SOCIAL-IQA accuracy: %.2f%%",accuracy * 100)
+
+        return accuracy
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--model-name", type=str, default="allenai/open-instruct-pythia-6.9b-tulu")
@@ -179,7 +209,7 @@ if __name__ == "__main__":
     elif args.dataset_name == "lm-pragmatics":
         logger.info("MCQA Evaluation on the Pragmega dataset")
         evaluator.pragmega_evaluate(dataset)
-    elif args.dataset_name == "allenai___social_i_qa":
+    elif args.dataset_name == "allenai/social_i_qa":
         logger.info("MCQA Evaluation on the Social-IQA dataset")
         print("Sample 1: ", dataset["validation"][0])
         
