@@ -59,7 +59,19 @@ class Baseline:
         elif self.dataset_name == "lm-pragmatics":
             logger.info("Loading Pragmega dataset")
             pragmega_dir = "/scratch/compuling/pasa00007/HF_DATA/datasets/lm-pragmatics/prompts"
-            self.dataset = pd.read_csv(f"{pragmega_dir}/Humour_prompts_seed0_examples0.csv")
+            phenomena = [
+                "Deceits",
+                "IndirectSpeech",
+                "Irony",
+                "Maxims",
+                "Metaphor",
+                "Humour",
+            ]
+            self.dataset = {}
+            for p in phenomena:
+                file_path = (pragmega_dir/ f"{p}_prompts_seed0_examples0.csv")
+                self.dataset[p] = pd.read_csv(file_path)
+
         else:
             self.dataset = load_dataset(self.dataset_name, cache_dir="/scratch/compuling/pasa00007/HF_DATA/datasets")
         logger.info("Dataset loaded successfully")

@@ -130,6 +130,37 @@ class MCQAEvaluator:
 
         return accuracy
 
+    def pragmega_evaluate(self,dataset):
+        total_correct = 0
+        total_samples = 0
+
+        choices = ["1","2","3","4","5"]
+
+        for p, data in dataset.items():
+            logger.info("Number of samples in phenomena: %s is %d",p,len(data))
+
+            correct = 0
+            total = len(data)
+
+            for _,row in tqdm(data.iterrows(),total=total,desc=f"Evaluating {p}"):
+                prompt = row["prompt"]
+                prediction, score = self.predict(prompt, choices)
+                predicted_ans = prediction+1
+                gt = int(row["randomized_true_answer"])
+
+                if predicted_ans == gt:
+                    correct +=1
+
+            total_correct+=correct
+            total_samples+=total
+        
+        accuracy = total_correct/total_samples if total_samples else 0.0
+        logger.info("Total Correct: %d", total_correct)
+        logger.info("PRAGMEGA accuracy: %.2f%%",accuracy * 100)
+
+        return accuracy
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--model-name", type=str, default="allenai/open-instruct-pythia-6.9b-tulu")
@@ -147,5 +178,5 @@ if __name__ == "__main__":
         evaluator.ludwig_evaluate(dataset["test"])
     elif args.dataset_name == "lm-pragmatics":
         logger.info("MCQA Evaluation on the Pragmega dataset")
-        print("Dataset shape: ", dataset.shape)
-        print("Sample 1: ",dataset.iloc[0].to_string())
+        evaluator.pragmega_evaluate(dataset)
+        
