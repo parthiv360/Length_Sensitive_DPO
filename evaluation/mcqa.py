@@ -145,3 +145,7 @@ if __name__ == "__main__":
     if args.dataset_name == "UCL-DARK/ludwig":
         logger.info("MCQA Evaluation on the ludwig dataset")
         evaluator.ludwig_evaluate(dataset["test"])
+    elif args.dataset_name == "lm-pragmatics":
+        logger.info("MCQA Evaluation on the Pragmega dataset")
+        print("Dataset shape: ", dataset.shape)
+        print("Sample 1: ",dataset.iloc[0].to_string())
