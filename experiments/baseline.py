@@ -58,7 +58,7 @@ class Baseline:
             )
         elif self.dataset_name == "lm-pragmatics":
             logger.info("Loading Pragmega dataset")
-            pragmega_dir = "/scratch/compuling/pasa00007/HF_DATA/datasets/lm-pragmatics/prompts"
+            pragmega_dir = Path("/scratch/compuling/pasa00007/HF_DATA/datasets/lm-pragmatics/prompts")
             phenomena = [
                 "Deceits",
                 "IndirectSpeech",
