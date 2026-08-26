@@ -179,4 +179,7 @@ if __name__ == "__main__":
     elif args.dataset_name == "lm-pragmatics":
         logger.info("MCQA Evaluation on the Pragmega dataset")
         evaluator.pragmega_evaluate(dataset)
+    elif args.dataset_name == "allenai___social_i_qa":
+        logger.info("MCQA Evaluation on the Social-IQA dataset")
+        print("Sample 1: ", dataset["validation"][0])
         
