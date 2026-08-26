@@ -58,7 +58,7 @@ class Baseline:
             )
         elif self.dataset_name == "lm-pragmatics":
             logger.info("Loading Pragmega dataset")
-            pragmega_dir = "/scratch/compuling/pasa00007/lm-pragmatics/prompts"
+            pragmega_dir = "/scratch/compuling/pasa00007/HF_DATA/datasets/lm-pragmatics/prompts"
             self.dataset = pd.read_csv(f"{pragmega_dir}/Humour_prompts_seed0_examples0.csv")
         else:
             self.dataset = load_dataset(self.dataset_name, cache_dir="/scratch/compuling/pasa00007/HF_DATA/datasets")
