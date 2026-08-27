@@ -211,5 +211,5 @@ if __name__ == "__main__":
         evaluator.pragmega_evaluate(dataset)
     elif args.dataset_name == "allenai/social_i_qa":
         logger.info("MCQA Evaluation on the Social-IQA dataset")
-        evaluator.social_iqa_evaluate(dataset["validate"])
+        evaluator.social_iqa_evaluate(dataset["validation"])
         
