@@ -1,4 +1,5 @@
 import torch
+import re
 
 from experiments.baseline import Baseline
 from transformers import AutoTokenizer, AutoModelForCausalLM
@@ -164,35 +165,66 @@ class LNRSEvaluator:
 
         return accuracy
 
+    def build_pragmega_prompt(self,data):
+        return (
+            f"{data['content']}\n"
+            f"Answer:"
+        )
+
+    def get_pragmega_gold_answer(self,data):
+        prompt = data["prompt"]
+        true_answer = int(data["randomized_true_answer"])
+
+        query = re.search(r"Options:\n(.*?)\nAnswer:",
+            prompt,
+            re.DOTALL
+        )
+
+        if not query:
+            raise RuntimeError("Could not find the gold answer")
+
+        options_text = query.group(1)
+        options = re.findall(
+            r"\d+\)\s*(.*?)(?=\n\d+\)|$)",
+            options_text,
+            re.DOTALL
+        )
+
+        if not options:
+            raise RuntimeError("Could not parse options")
+
+        return options[true_answer-1].strip()
+
     def pragmega_evaluate(self,dataset):
-        total_correct = 0
-        total_samples = 0
+        results = []
+        total = 0
 
-        choices = ["1","2","3","4","5"]
+        for phenomena, data in dataset.items():
+            logger.info(
+                "Number of samples in phenomenon %s: %d",
+                phenomena,
+                len(data)
+            )
 
-        for p, data in dataset.items():
-            logger.info("Number of samples in phenomena: %s is %d",p,len(data))
+            for _,row in tqdm(data.iterrows(),total = len(data), desc=f"Evaluating {phenomena}"):
+                prompt = self.build_pragmega_prompt(row)
+                gold_answer = self.get_pragmega_gold_answer(row)
+                model_answer = self.generate_response(prompt)
 
-            correct = 0
-            total = len(data)
+                results.append({
+                    "phenomena": phenomena,
+                    "item_id": row["item_id"],
+                    "prompt": prompt,
+                    "gold_answer": gold_answer,
+                    "model_answer": model_answer,
+                })
 
-            for _,row in tqdm(data.iterrows(),total=total,desc=f"Evaluating {p}"):
-                prompt = row["prompt"]
-                prediction, score = self.predict(prompt, choices)
-                predicted_ans = prediction+1
-                gt = int(row["randomized_true_answer"])
+                total += 1
 
-                if predicted_ans == gt:
-                    correct +=1
+        logger.info("Total LNRS samples: %d", total)
 
-            total_correct+=correct
-            total_samples+=total
-        
-        accuracy = total_correct/total_samples if total_samples else 0.0
-        logger.info("Total Correct: %d", total_correct)
-        logger.info("PRAGMEGA accuracy: %.2f%%",accuracy * 100)
+        return results
 
-        return accuracy
 
     def build_social_iqa_prompt(self,data):
         return (
@@ -242,11 +274,7 @@ if __name__ == "__main__":
         evaluator.ludwig_evaluate(dataset["test"])
     elif args.dataset_name == "lm-pragmatics":
         logger.info("MCQA Evaluation on the Pragmega dataset")
-        for phenomenon, data in dataset.items():
-            print("\n==============================")
-            print(phenomenon)
-            print(data.columns.tolist())
-            print(data.iloc[0].to_dict())
+        evaluator.pragmega_evaluate(dataset)
     elif args.dataset_name == "allenai/social_i_qa":
         logger.info("MCQA Evaluation on the Social-IQA dataset")
         evaluator.social_iqa_evaluate(dataset["validation"])
