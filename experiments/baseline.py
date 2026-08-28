@@ -7,6 +7,7 @@ import logging
 import os
 from datetime import datetime
 from pathlib import Path
+import pandas as pd
 
 LOG_DIR = Path(__file__).resolve().parent.parent / "run_logs"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
@@ -55,6 +56,22 @@ class Baseline:
                 "UCL-DARK/ludwig",
                 revision="refs/convert/parquet",
             )
+        elif self.dataset_name == "lm-pragmatics":
+            logger.info("Loading Pragmega dataset")
+            pragmega_dir = Path("/scratch/compuling/pasa00007/HF_DATA/datasets/lm-pragmatics/prompts")
+            phenomena = [
+                "Deceits",
+                "IndirectSpeech",
+                "Irony",
+                "Maxims",
+                "Metaphor",
+                "Humour",
+            ]
+            self.dataset = {}
+            for p in phenomena:
+                file_path = (pragmega_dir/ f"{p}_prompts_seed0_examples0.csv")
+                self.dataset[p] = pd.read_csv(file_path)
+
         else:
             self.dataset = load_dataset(self.dataset_name, cache_dir="/scratch/compuling/pasa00007/HF_DATA/datasets")
         logger.info("Dataset loaded successfully")
