@@ -14,7 +14,7 @@ from tqdm.auto import tqdm
 LOG_DIR = Path(__file__).resolve().parent.parent / "run_logs"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 
-LOG_FILE = LOG_DIR / f"mcqa_{datetime.now():%Y%m%d_%H%M%S_%f}_{os.getpid()}.log"
+LOG_FILE = LOG_DIR / f"LNRS_{datetime.now():%Y%m%d_%H%M%S_%f}_{os.getpid()}.log"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -227,6 +227,18 @@ class LNRSEvaluator:
 
         logger.info("Total LNRS samples: %d", total)
 
+        for result in results[:5]:
+            logger.info(
+                "\nItem ID: %s"
+                "\nPROMPT:\n%s"
+                "\nGOLD ANSWER: %s"
+                "\nMODEL ANSWER: %s"
+                "\n--------------------------------",
+                result["item_id"],
+                result["prompt"],
+                result["gold_answer"],
+                result["model_answer"],
+            )
         return results
 
 
@@ -274,12 +286,12 @@ if __name__ == "__main__":
     evaluator.load_model()
 
     if args.dataset_name == "UCL-DARK/ludwig":
-        logger.info("MCQA Evaluation on the ludwig dataset")
+        logger.info("LNRS Evaluation on the ludwig dataset")
         evaluator.ludwig_evaluate(dataset["test"])
     elif args.dataset_name == "lm-pragmatics":
-        logger.info("MCQA Evaluation on the Pragmega dataset")
+        logger.info("LNRS Evaluation on the Pragmega dataset")
         evaluator.pragmega_evaluate(dataset)
     elif args.dataset_name == "allenai/social_i_qa":
-        logger.info("MCQA Evaluation on the Social-IQA dataset")
+        logger.info("LNRS Evaluation on the Social-IQA dataset")
         evaluator.social_iqa_evaluate(dataset["validation"])
         
