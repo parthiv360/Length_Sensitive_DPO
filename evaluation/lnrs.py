@@ -234,7 +234,7 @@ if __name__ == "__main__":
     baseline = Baseline(model_name=args.model_name, dataset_name=args.dataset_name)
     baseline.load_dataset()
     dataset = baseline.dataset
-    evaluator = MCQAEvaluator(model_name=args.model_name)
+    evaluator = LNRSEvaluator(model_name=args.model_name)
     evaluator.load_model()
 
     if args.dataset_name == "UCL-DARK/ludwig":
