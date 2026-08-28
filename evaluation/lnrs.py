@@ -175,9 +175,10 @@ class LNRSEvaluator:
         prompt = data["prompt"]
         true_answer = int(data["randomized_true_answer"])
 
-        query = re.search(r"Options:\n(.*?)\nAnswer:",
+        query = re.search(
+            r"(?:Options|Punchlines):\s*\n(.*?)\nAnswer:",
             prompt,
-            re.DOTALL
+            re.DOTALL,
         )
 
         if not query:
@@ -192,6 +193,9 @@ class LNRSEvaluator:
 
         if not options:
             raise RuntimeError("Could not parse options")
+
+        if not 1 <= true_answer <= len(options):
+            raise RuntimeError("Gold answer index is out of range")
 
         return options[true_answer-1].strip()
 
