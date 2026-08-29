@@ -246,10 +246,6 @@ class LNRSEvaluator:
         return (
             f"Context: {data['context']}\n"
             f"Question: {data['question']}\n"
-            f"Answer choices:\n"
-            f"1. {data['answerA']}\n"
-            f"2. {data['answerB']}\n"
-            f"3. {data['answerC']}\n"
             f"Answer:"
         )
 
