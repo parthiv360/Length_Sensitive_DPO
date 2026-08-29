@@ -254,25 +254,43 @@ class LNRSEvaluator:
         )
 
     def social_iqa_evaluate(self,dataset):
-        correct = 0
-        total = len(dataset)
-        choices = ["1","2","3"]
-        logger.info("Total Evaluation Data %d", total)
+        results = []
+        total = 0
+        logger.info("Number of Social-IQA samples: %d",len(dataset))
 
-        for data in tqdm(dataset, total=total, desc="Evaluating Social-IQA"):
+        for data in tqdm(dataset, total=len(dataset), desc="Evaluating Social-IQA"):
             prompt = self.build_social_iqa_prompt(data)
-            prediction, score = self.predict(prompt,choices)
-            predicted_ans = int(choices[prediction])
-            gt = int(data["label"])
+            model_answer = self.generate_response(prompt)
+            choices = {
+                "1": data["answerA"],
+                "2": data["answerB"],
+                "3": data["answerC"],
+            }
+            gold_answer = choices[str(data["label"])]
+            results.append({
+                "item_id": data["id"],
+                "prompt": prompt,
+                "gold_answer": gold_answer,
+                "model_answer": model_answer,
+            })
+            total +=1
 
-            if predicted_ans == gt :
-                correct +=1
+        logger.info("Total Social_IQA samples: %d", total)
+        
+        for result in results[:5]:
+            logger.info(
+                "\nItem ID: %s"
+                "\nPROMPT:\n%s"
+                "\nGOLD ANSWER: %s"
+                "\nMODEL ANSWER: %s"
+                "\n--------------------------------",
+                result["item_id"],
+                result["prompt"],
+                result["gold_answer"],
+                result["model_answer"],
+            )
+        return results
 
-        accuracy = correct/total if total else 0.0
-        logger.info("Total Correct: %d", correct)
-        logger.info("SOCIAL-IQA accuracy: %.2f%%",accuracy * 100)
-
-        return accuracy
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--model-name", type=str, default="allenai/open-instruct-pythia-6.9b-tulu")
