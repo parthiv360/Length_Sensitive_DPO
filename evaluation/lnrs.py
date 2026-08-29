@@ -268,7 +268,6 @@ class LNRSEvaluator:
             }
             gold_answer = choices[str(data["label"])]
             results.append({
-                "item_id": data["id"],
                 "prompt": prompt,
                 "gold_answer": gold_answer,
                 "model_answer": model_answer,
@@ -279,12 +278,10 @@ class LNRSEvaluator:
         
         for result in results[:5]:
             logger.info(
-                "\nItem ID: %s"
                 "\nPROMPT:\n%s"
                 "\nGOLD ANSWER: %s"
                 "\nMODEL ANSWER: %s"
                 "\n--------------------------------",
-                result["item_id"],
                 result["prompt"],
                 result["gold_answer"],
                 result["model_answer"],
