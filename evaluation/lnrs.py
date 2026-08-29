@@ -145,25 +145,35 @@ class LNRSEvaluator:
         )
 
     def ludwig_evaluate(self, dataset):
-        correct = 0
+        results = []
         total = min(len(dataset),600)
         dataset = dataset.select(range(total))
         logger.info("Total evaluation data: %d", total)
         
         for data in tqdm(dataset, total=total, desc="Evaluating on Ludwig"):
             prompt = self.build_ludwig_prompt(data)
-            choices = ["yes","no"]
-            prediction, score = self.predict(prompt, choices)
-            predicted_ans = choices[prediction]
-            gt = data["implicature"].lower()
-            if predicted_ans == gt:
-                correct +=1
+            model_answer = self.generate_response(prompt)
+            gold_answer = data["implicature"]
+            results.append({
+                "id": data["id"],
+                "prompt": prompt,
+                "gold_answer": gold_answer,
+                "model_answer": model_answer,
+            })
 
-        accuracy = correct/total if total else 0.0
-        logger.info("Total Correct: %d", correct)
-        logger.info("LUDWIG accuracy: %.2f%%",accuracy * 100)
-
-        return accuracy
+        for result in results[:5]:
+            logger.info(
+                "\nID: %s"
+                "\nPROMPT:\n%s"
+                "\nGOLD ANSWER: %s"
+                "\nMODEL ANSWER: %s"
+                "\n--------------------------------",
+                result["id"],
+                result["prompt"],
+                result["gold_answer"],
+                result["model_answer"],
+            )
+        return results
 
     def build_pragmega_prompt(self,data):
         return (

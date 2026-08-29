@@ -23,7 +23,7 @@ echo "=========================================="
 
 "$CONDA_PYTHON" -m "$MODULE_NAME" \
     --model-name "allenai/open-instruct-pythia-6.9b-tulu" \
-    --dataset-name "allenai/social_i_qa"
+    --dataset-name "UCL-DARK/ludwig"
 
 echo "=========================================="
 echo "MCQA Execution Completed"
