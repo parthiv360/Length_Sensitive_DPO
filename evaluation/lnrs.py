@@ -272,7 +272,7 @@ class LNRSEvaluator:
 
     def get_tokens_length(self, text):
         tokens = self.tokenizer(text, add_special_tokens=False, return_attention_mask=False)
-        return len(tokens)["input_ids"]
+        return len(tokens["input_ids"])
     
     def evaluate(self, question, gold_resp, model_resp):
         model_score, gold_score = self.get_judge_score(question,gold_resp,model_resp)
