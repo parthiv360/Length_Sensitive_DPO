@@ -35,10 +35,10 @@ echo "=========================================="
     --max_steps -1 \
     --logging_steps 10 \
     --save_strategy "epoch" \
-    --gradient_checkpointing True \
+    --gradient_checkpointing \
     --dataloader_num_workers 4 \
     --use_wandb \
-    --max_length 512 \
+    --max_length 512 
 
 echo "=========================================="
 echo "SFT Training Completed"
