@@ -27,7 +27,7 @@ echo "=========================================="
     --output_dir "sft_model_output" \
     --num_train_epochs 1 \
     --batch_size 64 \
-    --grad_accumulation_steps 1 \
+    --gradient_accumulation_steps 1 \
     --learning_rate 5e-7 \
     --optimizer "rmsprop" \
     --max_grad_norm 10.0 \
@@ -36,7 +36,7 @@ echo "=========================================="
     --logging_steps 10 \
     --save_strategy "epoch" \
     --gradient_checkpointing True \
-    --dataloading_num_workers 4 \
+    --dataloader_num_workers 4 \
     --use_wandb \
     --max_length 512 \
 
