@@ -272,6 +272,9 @@ if __name__ == "__main__":
     trainer.load_model()
     datasets = args.dataset_name.split(",")
     train_dataset = trainer.concatenate_dataset(datasets)
+    train_dataset = train_dataset.filter(lambda x: x["answer"] is not None
+                                         and isinstance(x["answer"], str)
+                                         and x["answer"].strip() != "")
     train_dataset = train_dataset.map(trainer.tokenize_data, remove_columns=train_dataset.column_names)
 
     trainer.train(train_dataset, args)
