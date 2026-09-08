@@ -160,7 +160,7 @@ class SFTTrainer:
                     self.format_social_iqa,
                     remove_columns=dataset["train"].column_names,
                 )
-            elif dataset_name == "cfilt___pub":
+            elif dataset_name == "cfilt/PUB":
                 formatted_dataset = dataset["train"].map(
                     self.format_pub,
                     remove_columns=dataset["train"].column_names,
