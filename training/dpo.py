@@ -30,6 +30,56 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
+class DPODataCollator:
+    def __init__(self, tokenizer):
+        self.tokenizer = tokenizer
+
+    def __call__(self, features):
+        chosen = {
+            "input_ids": [f["chosen_input_ids"] for f in features],
+            "attention_mask": [f["chosen_attention_mask"] for f in features],
+            "labels": [f["chosen_labels"] for f in features],
+        }
+
+        rejected = {
+            "input_ids": [f["rejected_input_ids"] for f in features],
+            "attention_mask": [f["rejected_attention_mask"] for f in features],
+            "labels": [f["rejected_labels"] for f in features],
+        }
+
+        chosen_batch = self._pad(chosen)
+        rejected_batch = self._pad(rejected)
+
+        return {
+            "chosen_input_ids": chosen_batch["input_ids"],
+            "chosen_attention_mask": chosen_batch["attention_mask"],
+            "chosen_labels": chosen_batch["labels"],
+            "rejected_input_ids": rejected_batch["input_ids"],
+            "rejected_attention_mask": rejected_batch["attention_mask"],
+            "rejected_labels": rejected_batch["labels"],
+        }
+
+    def _pad(self, features):
+        max_length = max(len(x) for x in features["input_ids"])
+
+        input_ids = []
+        attention_mask = []
+        labels = []
+
+        for ids, mask, lbls in zip(features["input_ids"],features["attention_mask"],features["labels"],):
+            padding_length = max_length - len(ids)
+
+            input_ids.append(ids + [self.tokenizer.pad_token_id] * padding_length)
+
+            attention_mask.append(mask + [0] * padding_length)
+
+            labels.append(lbls + [-100] * padding_length)
+
+        return {
+            "input_ids": torch.tensor(input_ids, dtype=torch.long),
+            "attention_mask": torch.tensor(attention_mask, dtype=torch.long),
+            "labels": torch.tensor(labels, dtype=torch.long),
+        }
 class DPOTrainer(Trainer):
     def __init__(self, ref_model= None, beta= 0.1, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -180,22 +230,36 @@ class DPO:
             truncation=True,
             max_length= self.max_length)
 
-        answer_tokens = self.tokenizer(
-            " " + data["answer"],
+        chosen_tokens = self.tokenizer(
+            " " + data["chosen"],
             add_special_tokens=False,
-            )
+        )
 
-        max_answer_length = self.max_length - len(prompt_tokens["input_ids"]) - 1
+        rejected_tokens = self.tokenizer(
+            " " + data["rejected"],
+            add_special_tokens=False,
+        )
 
-        answer_ids = answer_tokens["input_ids"][:max_answer_length]
+        prompt_ids = prompt_tokens["input_ids"]
+        max_chosen_length = self.max_length - len(prompt_ids) -1
+        max_rejected_length = self.max_length - len(prompt_ids) -1
 
-        input_ids = prompt_tokens["input_ids"] + answer_ids + [self.tokenizer.eos_token_id]
-        labels = ([-100] * len(prompt_tokens["input_ids"]) + answer_ids + [self.tokenizer.eos_token_id])
+        chosen_ids = chosen_tokens["input_ids"][:max_chosen_length]
+        rejected_ids = rejected_tokens["input_ids"][:max_rejected_length]
+
+        chosen_input_ids = prompt_ids + chosen_ids + [self.tokenizer.eos_token_id]
+        rejected_input_ids = prompt_ids + rejected_ids + [self.tokenizer.eos_token_id]
+
+        chosen_labels = [-100] * len(prompt_ids) + chosen_ids + [self.tokenizer.eos_token_id]
+        rejected_labels = [-100] * len(prompt_ids) + rejected_ids + [self.tokenizer.eos_token_id]
 
         return {
-            "input_ids": input_ids,
-            "attention_mask": [1] * len(input_ids),
-            "labels": labels,
+            "chosen_input_ids": chosen_input_ids,
+            "chosen_attention_mask": [1] * len(chosen_input_ids),
+            "chosen_labels": chosen_labels,
+            "rejected_input_ids": rejected_input_ids,
+            "rejected_attention_mask": [1] * len(rejected_input_ids),
+            "rejected_labels": rejected_labels,
         }
     
     def format_social_iqa(self, dataset):
@@ -267,13 +331,11 @@ class DPO:
                 formatted_dataset = dataset["train"].map(
                     self.format_social_iqa,
                     remove_columns=dataset["train"].column_names,
-                    batched = True
                 )
             elif dataset_name == "cfilt/PUB":
                 formatted_dataset = dataset["train"].map(
                     self.format_pub,
                     remove_columns=dataset["train"].column_names,
-                    batched = True
                 )
             else:
                 raise ValueError(f"Unsupported dataset for concatenation: {dataset_name}")
@@ -308,14 +370,12 @@ class DPO:
             dataloader_num_workers=args.dataloader_num_workers,
             report_to="wandb" if args.use_wandb else "none")
 
-        data_collator = DataCollatorForSeq2Seq(
-            tokenizer=self.tokenizer, 
-            padding=True, 
-            label_pad_token_id=-100,
-            return_tensors="pt")
+        data_collator = DPODataCollator(tokenizer=self.tokenizer)
 
         trainer = DPOTrainer(
             model=self.model,
+            ref_model=self.ref_model,
+            beta=self.beta,
             args=training_args,
             train_dataset=dataset,
             tokenizer=self.tokenizer,
@@ -373,21 +433,27 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    trainer = DPOTrainer(
+    dpo = DPO(
         model_name=args.model_name,
         output_dir=args.output_dir,
         max_length=args.max_length
     )
 
-    trainer.load_model()
+    dpo.load_model()
     datasets = args.dataset_name.split(",")
-    train_dataset = trainer.concatenate_dataset(datasets)
-    train_dataset = train_dataset.filter(lambda x: x["answer"] is not None
-                                         and isinstance(x["answer"], str)
-                                         and x["answer"].strip() != "")
-    train_dataset = train_dataset.map(trainer.tokenize_data, remove_columns=train_dataset.column_names)
+    train_dataset = dpo.concatenate_dataset(datasets)
+    train_dataset = train_dataset.filter(lambda x: x["prompt"] is not None
+                                         and x["chosen"] is not None
+                                         and x["rejected"] is not None
+                                         and isinstance(x["prompt"], str)
+                                         and isinstance(x["chosen"], str)
+                                         and isinstance(x["rejected"], str)
+                                         and x["prompt"].strip() != ""
+                                         and x["chosen"].strip() != ""
+                                         and x["rejected"].strip() != "")
+    train_dataset = train_dataset.map(dpo.tokenize_data, remove_columns=train_dataset.column_names)
 
-    trainer.train(train_dataset, args)
+    dpo.train(train_dataset, args)
     
 
 
