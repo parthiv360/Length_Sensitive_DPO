@@ -328,15 +328,9 @@ class DPO:
             dataset = self.dataset
 
             if dataset_name == "allenai/social_i_qa":
-                formatted_dataset = dataset["train"].map(
-                    self.format_social_iqa,
-                    remove_columns=dataset["train"].column_names,
-                )
+                formatted_dataset = self.format_social_iqa(dataset["train"])
             elif dataset_name == "cfilt/PUB":
-                formatted_dataset = dataset["train"].map(
-                    self.format_pub,
-                    remove_columns=dataset["train"].column_names,
-                )
+                formatted_dataset = self.format_pub(dataset["train"])
             else:
                 raise ValueError(f"Unsupported dataset for concatenation: {dataset_name}")
 
