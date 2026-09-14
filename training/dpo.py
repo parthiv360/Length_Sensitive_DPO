@@ -91,6 +91,7 @@ class DPOTrainer(Trainer):
         for param in self.ref_model.parameters():
             param.requires_grad = False
 
+
     def get_log_probs(self, model, input_ids, attention_mask, labels):
         
         outputs = model(input_ids=input_ids, attention_mask=attention_mask)
@@ -115,6 +116,7 @@ class DPOTrainer(Trainer):
         return loss
 
     def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
+
         chosen_input_ids = inputs["chosen_input_ids"]
         chosen_attention_mask = inputs["chosen_attention_mask"]
         chosen_labels = inputs["chosen_labels"]
@@ -176,6 +178,9 @@ class DPO:
 
         for param in self.ref_model.parameters():
             param.requires_grad = False
+
+        self.model = self.model.to(self.device)
+        self.ref_model = self.ref_model.to(self.device)
 
         logger.info("Both Models and tokenizer loaded successfully")
         
