@@ -5,3 +5,4 @@ run_logs/
 .DS_Store
 sft_model_output/
 wandb/
+dpo_model_output/
