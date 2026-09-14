@@ -362,6 +362,7 @@ class DPO:
             save_total_limit=args.save_total_limit,
             gradient_checkpointing=args.gradient_checkpointing,
             dataloader_num_workers=args.dataloader_num_workers,
+            remove_unused_columns = False,
             report_to="wandb" if args.use_wandb else "none")
 
         data_collator = DPODataCollator(tokenizer=self.tokenizer)
