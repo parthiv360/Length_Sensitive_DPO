@@ -114,7 +114,7 @@ class DPOTrainer(Trainer):
         loss = -torch.nn.functional.logsigmoid(logits).mean()
         return loss
 
-    def compute_loss(self, model, inputs, return_outputs=False):
+    def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
         chosen_input_ids = inputs["chosen_input_ids"]
         chosen_attention_mask = inputs["chosen_attention_mask"]
         chosen_labels = inputs["chosen_labels"]
