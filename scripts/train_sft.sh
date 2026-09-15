@@ -1,4 +1,12 @@
 #!/bin/bash
+echo "HOME=$HOME"
+echo "HF_HOME=$HF_HOME"
+
+if [ -f "$HOME/.cache/huggingface/token" ]; then
+    echo "HF token visible inside job"
+else
+    echo "HF token NOT visible inside job"
+fi
 
 SCRIPT_NAME="training/sft.py"
 CONDA_ENV_NAME="base"  # Use the base environment
