@@ -1,12 +1,17 @@
 #!/bin/bash
 echo "HOME=$HOME"
-echo "HF_HOME=$HF_HOME"
+export HF_DATASETS_CACHE="/scratch/compuling/pasa00007/HF_DATA/datasets"
+export HUGGINGFACE_HUB_CACHE="/scratch/compuling/pasa00007/HF_DATA/hub"
+
+echo "HF_DATASETS_CACHE=$HF_DATASETS_CACHE"
+echo "HUGGINGFACE_HUB_CACHE=$HUGGINGFACE_HUB_CACHE"
 
 if [ -f "$HOME/.cache/huggingface/token" ]; then
     echo "HF token visible inside job"
 else
     echo "HF token NOT visible inside job"
 fi
+
 
 SCRIPT_NAME="training/sft.py"
 CONDA_ENV_NAME="base"  # Use the base environment
@@ -16,9 +21,9 @@ CONDA_PYTHON="/home/pasa00007/.conda/envs/agentic-eval/bin/python"
 MODULE_NAME="training.sft"
 
 # Hugging Face cache on scratch
-export HF_HOME="/scratch/compuling/pasa00007/HF_DATA"
-export HF_DATASETS_CACHE="$HF_HOME/datasets"
-export HUGGINGFACE_HUB_CACHE="$HF_HOME/hub"
+# export HF_HOME="/scratch/compuling/pasa00007/HF_DATA"
+# export HF_DATASETS_CACHE="$HF_HOME/datasets"
+# export HUGGINGFACE_HUB_CACHE="$HF_HOME/hub"
 
 # Navigate to the project directory
 cd "$PROJECT_DIR" || { echo "Failed to change directory to $PROJECT_DIR"; exit 1; }
