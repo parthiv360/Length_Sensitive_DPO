@@ -26,8 +26,8 @@ echo "=========================================="
     --dataset_name "allenai/social_i_qa,cfilt/PUB" \
     --output_dir "dpo_model_output" \
     --num_train_epochs 1 \
-    --batch_size 64 \
-    --gradient_accumulation_steps 1 \
+    --batch_size 4 \
+    --gradient_accumulation_steps 16 \
     --learning_rate 5e-7 \
     --optimizer "rmsprop" \
     --max_grad_norm 10.0 \
