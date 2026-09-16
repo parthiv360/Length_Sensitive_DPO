@@ -36,7 +36,7 @@ echo "=========================================="
     --logging_steps 10 \
     --save_strategy "epoch" \
     --gradient_checkpointing \
-    --dataloader_num_workers 4 \
+    --dataloader_num_workers 0 \
     --use_wandb \
     --max_length 512 
 
