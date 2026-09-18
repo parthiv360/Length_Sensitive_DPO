@@ -82,6 +82,12 @@ class RDPOTrainer(DPOTrainer):
         return loss
 
 class RDPO(DPO):
+    def __init__(self, model_name, output_dir, max_length=512, beta=0.1, alpha = 0.01):
+
+        super().__init__(model_name, output_dir, max_length,beta)
+        self.beta = beta
+        self.alpha = alpha
+
     def train(self,dataset,args):
         training_args = TrainingArguments(
         output_dir=self.output_dir,
@@ -171,6 +177,8 @@ if __name__ == "__main__":
         model_name=args.model_name,
         output_dir=args.output_dir,
         max_length=args.max_length,
+        beta=0.1,
+        alpha=0.01
     )
 
     ls_dpo.load_model()
