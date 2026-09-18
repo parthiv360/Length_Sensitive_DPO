@@ -24,10 +24,10 @@ echo "=========================================="
 "$CONDA_PYTHON" -m "$MODULE_NAME" \
     --model_name "allenai/open-instruct-pythia-6.9b-tulu" \
     --dataset_name "allenai/social_i_qa,cfilt/PUB" \
-    --output_dir "dpo_model_output" \
+    --output_dir "dpo_model_output/pythia-6.9b-tulu" \
     --num_train_epochs 1 \
-    --batch_size 64 \
-    --gradient_accumulation_steps 1 \
+    --batch_size 4 \
+    --gradient_accumulation_steps 16 \
     --learning_rate 5e-7 \
     --optimizer "rmsprop" \
     --max_grad_norm 10.0 \
@@ -36,7 +36,7 @@ echo "=========================================="
     --logging_steps 10 \
     --save_strategy "epoch" \
     --gradient_checkpointing \
-    --dataloader_num_workers 4 \
+    --dataloader_num_workers 0 \
     --use_wandb \
     --max_length 512 
 

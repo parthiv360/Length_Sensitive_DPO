@@ -165,11 +165,13 @@ class DPO:
 
         self.model = AutoModelForCausalLM.from_pretrained(
             self.model_name,
-            torch_dtype=torch.bfloat16 if torch.cuda.is_available() else torch.float32)
+            torch_dtype=torch.bfloat16 if torch.cuda.is_available() else torch.float32,
+            low_cpu_mem_usage= True)
 
         self.ref_model = AutoModelForCausalLM.from_pretrained(
             self.model_name,
-            torch_dtype=torch.bfloat16 if torch.cuda.is_available() else torch.float32)
+            torch_dtype=torch.bfloat16 if torch.cuda.is_available() else torch.float32,
+            low_cpu_mem_usage= True)
 
         self.model.config.pad_token_id = self.tokenizer.pad_token_id
         self.ref_model.config.pad_token_id = self.tokenizer.pad_token_id
@@ -181,6 +183,8 @@ class DPO:
 
         self.model = self.model.to(self.device)
         self.ref_model = self.ref_model.to(self.device)
+
+        self.model.config.use_cache = False
 
         logger.info("Both Models and tokenizer loaded successfully")
         
