@@ -60,10 +60,10 @@ class RDPOTrainer(DPOTrainer):
         ref_log_ratios = (ref_chosen_logs-ref_rejected_logs)
         dpo_logits = self.beta*(log_ratios - ref_log_ratios)
 
-        chosen_lengths = (chosen_labels !=-100).sum(dim=1)
-        rejected_lengths = (rejected_labels!=-100).sum(dim=1)
+        chosen_lengths = (chosen_labels !=-100).sum(dim=1).float()
+        rejected_lengths = (rejected_labels!=-100).sum(dim=1).float()
         length_difference = (chosen_lengths-rejected_lengths)
-        length_reg = (self.alpha * length_difference)
+        length_reg = (-self.alpha * length_difference)
 
         logits = (dpo_logits+length_reg)
         loss = -torch.nn.functional.logsigmoid(logits).mean()
