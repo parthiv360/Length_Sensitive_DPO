@@ -6,3 +6,4 @@ run_logs/
 sft_model_output/
 wandb/
 dpo_model_output/
+ls_dpo_model_output/
