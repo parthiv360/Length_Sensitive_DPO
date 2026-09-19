@@ -37,7 +37,7 @@ echo "=========================================="
 "$CONDA_PYTHON" -m "$MODULE_NAME" \
     --model_name "meta-llama/Llama-2-13b-chat-hf" \
     --dataset_name "allenai/social_i_qa,cfilt/PUB" \
-    --output_dir "sft_model_output" \
+    --output_dir "sft_model_output/llama-2-13b-chat" \
     --num_train_epochs 1 \
     --batch_size 64 \
     --gradient_accumulation_steps 1 \
