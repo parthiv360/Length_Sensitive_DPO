@@ -23,7 +23,7 @@ echo "=========================================="
 
 "$CONDA_PYTHON" -m "$MODULE_NAME" \
     --model-name "meta-llama/Llama-2-13b-chat-hf" \
-    --dataset-name "allenai/social_i_qa"
+    --dataset-name "lm-pragmatics"
 
 echo "=========================================="
 echo "MCQA Execution Completed"
