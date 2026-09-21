@@ -22,7 +22,7 @@ echo "Conda Environment: $CONDA_ENV_NAME"
 echo "=========================================="
 
 "$CONDA_PYTHON" -m "$MODULE_NAME" \
-    --model-name "meta-llama/Llama-2-7b-chat-hf" \
+    --model-name "allenai/open-instruct-pythia-6.9b-tulu" \
     --dataset-name "lm-pragmatics"
 
 echo "=========================================="
