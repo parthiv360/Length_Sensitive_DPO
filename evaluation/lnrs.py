@@ -220,7 +220,7 @@ class LNRSEvaluator:
         
         prompt = self.build_judge_prompt(question,model_resp,gold_resp,rev)
         text = self.generate_judge_response(prompt)
-        logger.info("Judge Response:\n%s", text)
+        # logger.info("Judge Response:\n%s", text)
         
         lines = text.splitlines()
         if not lines:
@@ -312,24 +312,24 @@ class LNRSEvaluator:
                 **evaluation
             })
 
-        for result in results[:5]:
-            logger.info(
-                "\nID: %s"
-                "\nPROMPT:\n%s"
-                "\nGOLD ANSWER: %s"
-                "\nMODEL ANSWER: %s"
-                "\nGOLD SCORE: %f"
-                "\nMODEL SCORE: %f"
+        # for result in results[:5]:
+        #     logger.info(
+        #         "\nID: %s"
+        #         "\nPROMPT:\n%s"
+        #         "\nGOLD ANSWER: %s"
+        #         "\nMODEL ANSWER: %s"
+        #         "\nGOLD SCORE: %f"
+        #         "\nMODEL SCORE: %f"
                 
-                "\n--------------------------------",
-                result["id"],
-                result["prompt"],
-                result["gold_answer"],
-                result["model_answer"],
-                result["gold_score"],
-                result["model_score"]
+        #         "\n--------------------------------",
+        #         result["id"],
+        #         result["prompt"],
+        #         result["gold_answer"],
+        #         result["model_answer"],
+        #         result["gold_score"],
+        #         result["model_score"]
                 
-            )
+        #     )
         return results
 
     def build_pragmega_prompt(self,data):
@@ -394,22 +394,22 @@ class LNRSEvaluator:
 
         logger.info("Total LNRS samples: %d", total)
 
-        for result in results[:5]:
-            logger.info(
-                "\nItem ID: %s"
-                "\nPROMPT:\n%s"
-                "\nGOLD ANSWER: %s"
-                "\nMODEL ANSWER: %s"
-                "\nGOLD SCORE: %f"
-                "\nMODEL SCORE: %f"
-                "\n--------------------------------",
-                result["item_id"],
-                result["prompt"],
-                result["gold_answer"],
-                result["model_answer"],
-                result["gold_score"],
-                result["model_score"]
-            )
+        # for result in results[:5]:
+        #     logger.info(
+        #         "\nItem ID: %s"
+        #         "\nPROMPT:\n%s"
+        #         "\nGOLD ANSWER: %s"
+        #         "\nMODEL ANSWER: %s"
+        #         "\nGOLD SCORE: %f"
+        #         "\nMODEL SCORE: %f"
+        #         "\n--------------------------------",
+        #         result["item_id"],
+        #         result["prompt"],
+        #         result["gold_answer"],
+        #         result["model_answer"],
+        #         result["gold_score"],
+        #         result["model_score"]
+        #     )
         return results
 
 
@@ -443,20 +443,20 @@ class LNRSEvaluator:
 
         logger.info("Total Social_IQA samples: %d", total)
         
-        for result in results[:5]:
-            logger.info(
-                "\nPROMPT:\n%s"
-                "\nGOLD ANSWER: %s"
-                "\nMODEL ANSWER: %s"
-                "\nGOLD SCORE: %f"
-                "\nMODEL SCORE: %f"
-                "\n--------------------------------",
-                result["prompt"],
-                result["gold_answer"],
-                result["model_answer"],
-                result["gold_score"],
-                result["model_score"]
-            )
+        # for result in results[:5]:
+        #     logger.info(
+        #         "\nPROMPT:\n%s"
+        #         "\nGOLD ANSWER: %s"
+        #         "\nMODEL ANSWER: %s"
+        #         "\nGOLD SCORE: %f"
+        #         "\nMODEL SCORE: %f"
+        #         "\n--------------------------------",
+        #         result["prompt"],
+        #         result["gold_answer"],
+        #         result["model_answer"],
+        #         result["gold_score"],
+        #         result["model_score"]
+        #     )
         return results
 
 if __name__ == "__main__":
