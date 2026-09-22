@@ -22,7 +22,7 @@ echo "Conda Environment: $CONDA_ENV_NAME"
 echo "=========================================="
 
 "$CONDA_PYTHON" -m "$MODULE_NAME" \
-    --model-name "sft_model_output/llama-7b-chat" \
+    --model-name "sft_model_output/llama-2-7b-chat" \
     --dataset-name "allenai/social_i_qa"
 
 echo "=========================================="
