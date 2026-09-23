@@ -22,9 +22,9 @@ echo "Conda Environment: $CONDA_ENV_NAME"
 echo "=========================================="
 
 "$CONDA_PYTHON" -m "$MODULE_NAME" \
-    --model_name "allenai/open-instruct-pythia-6.9b-tulu" \
+    --model_name "meta-llama/Llama-2-13b-chat-hf" \
     --dataset_name "allenai/social_i_qa,cfilt/PUB" \
-    --output_dir "dpo_model_output/pythia-6.9b-tulu" \
+    --output_dir "dpo_model_output/llama-2-13b-chat" \
     --num_train_epochs 1 \
     --batch_size 4 \
     --gradient_accumulation_steps 16 \
