@@ -311,7 +311,7 @@ class LNRSEvaluator:
         return (
             f"Utterance: {data['utterance']}\n"
             f"Response: {data['response']}\n"
-            f"Does the response imply that the answer to the utterance is yes or no?\n"
+            f"Does the response imply that the answer to the utterance is yes or no? Only answer yes or no.\n"
             f"Answer:"
         )
 
