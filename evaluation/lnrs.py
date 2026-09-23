@@ -154,9 +154,9 @@ class LNRSEvaluator:
             skip_special_tokens = True
         ).strip()
 
-        logger.info("PROMPT: %s", prompt)
-        logger.info("GENERATED: %r", answer)
-        logger.info("GENERATED TOKENS: %d", len(generated_tokens))
+        # logger.info("PROMPT: %s", prompt)
+        # logger.info("GENERATED: %r", answer)
+        # logger.info("GENERATED TOKENS: %d", len(generated_tokens))
 
         return answer
         
