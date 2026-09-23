@@ -163,9 +163,9 @@ class LNRSEvaluator:
             skip_special_tokens = True
         ).strip()
 
-        logger.info("PROMPT: %s", prompt)
-        logger.info("GENERATED: %r", answer)
-        logger.info("GENERATED TOKENS: %d", len(generated_tokens))
+        # logger.info("PROMPT: %s", prompt)
+        # logger.info("GENERATED: %r", answer)
+        # logger.info("GENERATED TOKENS: %d", len(generated_tokens))
 
         return answer
         
@@ -418,13 +418,6 @@ class LNRSEvaluator:
                     "prompt": prompt,
                     **evaluation
                 })
-
-                total += 1
-                if total >= 1:
-                    break
-
-            if total >=1:
-                break
 
         logger.info("Total LNRS samples: %d", total)
 
