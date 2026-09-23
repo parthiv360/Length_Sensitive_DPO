@@ -57,15 +57,15 @@ echo "=========================================="
 
 "$CONDA_PYTHON" -m "$MODULE_NAME" \
     --model-name "ls_dpo_model_output/llama-2-13b-chat" \
-    --dataset-name "UCL-DARK/ludwig"
+    --dataset-name "lm-pragmatics"
 
 "$CONDA_PYTHON" -m "$MODULE_NAME" \
     --model-name "dpo_model_output/llama-2-13b-chat" \
-    --dataset-name "UCL-DARK/ludwig"
+    --dataset-name "lm-pragmatics"
 
 "$CONDA_PYTHON" -m "$MODULE_NAME" \
     --model-name "sft_model_output/llama-2-13b-chat" \
-    --dataset-name "UCL-DARK/ludwig"
+    --dataset-name "lm-pragmatics"
 
 
 echo "=========================================="

@@ -326,7 +326,7 @@ class LNRSEvaluator:
 
     def ludwig_evaluate(self, dataset):
         results = []
-        total = min(len(dataset),1)
+        total = min(len(dataset),600)
         dataset = dataset.select(range(total))
         logger.info("Total evaluation data: %d", total)
         
@@ -420,6 +420,11 @@ class LNRSEvaluator:
                 })
 
                 total += 1
+                if total >= 1:
+                    break
+
+            if total >=1:
+                break
 
         logger.info("Total LNRS samples: %d", total)
 
