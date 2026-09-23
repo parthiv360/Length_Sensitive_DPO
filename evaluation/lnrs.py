@@ -397,7 +397,7 @@ class LNRSEvaluator:
                 len(data)
             )
 
-            for _,row in tqdm(data.iterrows(),total = len(data), desc=f"Evaluating {phenomena}"):
+            for _,row in tqdm(data.iterrows(),total = 1, desc=f"Evaluating {phenomena}"):
                 prompt = self.build_pragmega_prompt(row)
                 gold_answer = self.get_pragmega_gold_answer(row)
                 model_answer = self.generate_response(prompt)
