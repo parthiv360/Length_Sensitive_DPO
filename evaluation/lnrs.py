@@ -269,7 +269,7 @@ class LNRSEvaluator:
 
         return model_score, gold_score
     
-    def calculate_lnrs(self, results, tau = 1.0):
+    def calculate_lnrs(self, results, tau = 100.0):
         T = len(results)
         model_score_sum = sum(result["model_score"] for result in results)
         gold_score_sum = sum(result["gold_score"] for result in results)
