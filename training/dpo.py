@@ -233,21 +233,27 @@ class DPO:
         logger.info("Dataset loaded successfully")
 
     def tokenize_data(self, data):
+
+        messages = [
+            {"role": "system", "content": "You are a helpful and concise AI assistant."},
+            {"role": "user", "content": data["prompt"]}
+        ]
+
+        format_prompt = self.tokenizer.apply_chat_template(
+            messages,
+            tokenize=False,
+            add_generation_prompt=True
+        )
+
         prompt_tokens = self.tokenizer(
-            data["prompt"],
+            format_prompt,
             add_special_tokens=False,
             truncation=True,
             max_length= self.max_length)
 
-        chosen_tokens = self.tokenizer(
-            " " + data["chosen"],
-            add_special_tokens=False,
-        )
+        chosen_tokens = self.tokenizer(" " + data["chosen"],add_special_tokens=False,)
 
-        rejected_tokens = self.tokenizer(
-            " " + data["rejected"],
-            add_special_tokens=False,
-        )
+        rejected_tokens = self.tokenizer(" " + data["rejected"],add_special_tokens=False,)
 
         prompt_ids = prompt_tokens["input_ids"]
         max_chosen_length = self.max_length - len(prompt_ids) -1
