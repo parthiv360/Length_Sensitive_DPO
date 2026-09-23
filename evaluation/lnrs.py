@@ -125,8 +125,16 @@ class LNRSEvaluator:
     @torch.no_grad()
     def generate_response(self,prompt,max_new_tokens:int = 128):
 
+        messages = [
+            {"role": "system", "content": "You are a helpful and concise AI assistant."},
+            {"role": "user", "content": prompt}
+        ]
+
+        format_prompt = self.tokenizer.apply_chat_template(messages,
+                                                           tokenize = False,
+                                                           add_generation_prompt = True)
         inputs = self.tokenizer(
-            prompt,
+            format_prompt,
             return_tensors ="pt",
             truncation = True,
             max_length= self.max_length
@@ -144,7 +152,8 @@ class LNRSEvaluator:
             max_new_tokens= max_new_tokens,
             do_sample = False,
             temperature = None,
-            pad_token_id = self.tokenizer.eos_token_id
+            pad_token_id = self.tokenizer.eos_token_id,
+            eos_token_id = self.tokenizer.eos_token_id
         )
 
         generated_tokens = outputs[0][inputs["input_ids"].shape[1]:]
@@ -154,9 +163,9 @@ class LNRSEvaluator:
             skip_special_tokens = True
         ).strip()
 
-        # logger.info("PROMPT: %s", prompt)
-        # logger.info("GENERATED: %r", answer)
-        # logger.info("GENERATED TOKENS: %d", len(generated_tokens))
+        logger.info("PROMPT: %s", prompt)
+        logger.info("GENERATED: %r", answer)
+        logger.info("GENERATED TOKENS: %d", len(generated_tokens))
 
         return answer
         
@@ -311,13 +320,13 @@ class LNRSEvaluator:
         return (
             f"Utterance: {data['utterance']}\n"
             f"Response: {data['response']}\n"
-            f"Does the response imply that the answer to the utterance is yes or no? Only answer yes or no.\n"
+            f"Does the response imply that the answer to the utterance is yes or no?\n"
             f"Answer:"
         )
 
     def ludwig_evaluate(self, dataset):
         results = []
-        total = min(len(dataset),600)
+        total = min(len(dataset),1)
         dataset = dataset.select(range(total))
         logger.info("Total evaluation data: %d", total)
         
