@@ -154,6 +154,10 @@ class LNRSEvaluator:
             skip_special_tokens = True
         ).strip()
 
+        logger.info("PROMPT: %s", prompt)
+        logger.info("GENERATED: %r", answer)
+        logger.info("GENERATED TOKENS: %d", len(generated_tokens))
+
         return answer
         
     def build_judge_prompt(self, question, model_ans, gold_ans, rev=False):
@@ -263,10 +267,26 @@ class LNRSEvaluator:
         model_length_sum = sum(result["model_length"] for result in results)
         gold_length_sum = sum(result["gold_length"] for result in results)
 
+        avg_model_length = model_length_sum /T
+        avg_gold_length = gold_length_sum /T
+
         relative_score = (model_score_sum/gold_score_sum if gold_score_sum > 0 else 0)
         length_diff = (gold_length_sum - model_length_sum)
         lf = 1/ ( 1+ np.exp(-length_diff / (tau * T)))
         lnrs = relative_score*lf    
+
+        logger.info("========== LNRS Statistics ==========")
+        logger.info("Samples: %d", T)
+        logger.info("Average model length: %.3f", avg_model_length)
+        logger.info("Average gold length: %.3f", avg_gold_length)
+        logger.info("Model score sum: %.3f", model_score_sum)
+        logger.info("Gold score sum: %.3f", gold_score_sum)
+        logger.info("Relative score: %.6f", relative_score)
+        logger.info("Length difference: %.3f", length_diff)
+        logger.info("Length factor: %.6f", lf)
+        logger.info("LNRS: %.6f", lnrs)
+        logger.info("====================================")
+
 
         return lnrs
 
@@ -297,7 +317,7 @@ class LNRSEvaluator:
 
     def ludwig_evaluate(self, dataset):
         results = []
-        total = min(len(dataset),600)
+        total = min(len(dataset),1)
         dataset = dataset.select(range(total))
         logger.info("Total evaluation data: %d", total)
         
