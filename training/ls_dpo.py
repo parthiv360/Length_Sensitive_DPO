@@ -19,7 +19,7 @@ import wandb
 LOG_DIR = Path(__file__).resolve().parent.parent / "run_logs"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
 
-LOG_FILE = LOG_DIR / f"DPO_Training_{datetime.now():%Y%m%d_%H%M%S_%f}_{os.getpid()}.log"
+LOG_FILE = LOG_DIR / f"LS_DPO_Training_{datetime.now():%Y%m%d_%H%M%S_%f}_{os.getpid()}.log"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -33,7 +33,7 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-class RDPOTrainer(DPOTrainer):
+class LSDPOTrainer(DPOTrainer):
     def __init__(self, ref_model=None, beta=0.1, alpha = 0.01, *args, **kwargs):
         super().__init__(ref_model, beta, *args, **kwargs)
         self.alpha = alpha
@@ -111,7 +111,7 @@ class RDPO(DPO):
         
         data_collator = DPODataCollator(tokenizer=self.tokenizer)
         
-        trainer = RDPOTrainer(
+        trainer = LSDPOTrainer(
             model=self.model,
             ref_model=self.ref_model,
             beta=self.beta,
