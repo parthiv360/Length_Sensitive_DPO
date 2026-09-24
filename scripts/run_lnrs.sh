@@ -70,8 +70,8 @@ echo "=========================================="
 #     --dataset-name "UCL-DARK/ludwig"
 
 "$CONDA_PYTHON" -m "$MODULE_NAME" \
-    --model-name "ls_dpo_model_output/llama-2-13b-chat" \
-    --dataset-name "lm-pragmatics"
+    --model-name "dpo_model_output/llama-2-13b-chat" \
+    --dataset-name "allenai/social_i_qa"
 
 # "$CONDA_PYTHON" -m "$MODULE_NAME" \
 #     --model-name "dpo_model_output/llama-2-13b-chat" \
