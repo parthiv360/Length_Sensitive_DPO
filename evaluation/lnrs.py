@@ -125,8 +125,16 @@ class LNRSEvaluator:
     @torch.no_grad()
     def generate_response(self,prompt,max_new_tokens:int = 128):
 
+        messages = [
+            {"role": "system", "content": "You are a helpful and concise AI assistant."},
+            {"role": "user", "content": prompt}
+        ]
+
+        format_prompt = self.tokenizer.apply_chat_template(messages,
+                                                           tokenize = False,
+                                                           add_generation_prompt = True)
         inputs = self.tokenizer(
-            prompt,
+            format_prompt,
             return_tensors ="pt",
             truncation = True,
             max_length= self.max_length
@@ -144,7 +152,8 @@ class LNRSEvaluator:
             max_new_tokens= max_new_tokens,
             do_sample = False,
             temperature = None,
-            pad_token_id = self.tokenizer.eos_token_id
+            pad_token_id = self.tokenizer.eos_token_id,
+            eos_token_id = self.tokenizer.eos_token_id
         )
 
         generated_tokens = outputs[0][inputs["input_ids"].shape[1]:]
@@ -153,6 +162,10 @@ class LNRSEvaluator:
             generated_tokens,
             skip_special_tokens = True
         ).strip()
+
+        # logger.info("PROMPT: %s", prompt)
+        # logger.info("GENERATED: %r", answer)
+        # logger.info("GENERATED TOKENS: %d", len(generated_tokens))
 
         return answer
         
@@ -220,7 +233,7 @@ class LNRSEvaluator:
         
         prompt = self.build_judge_prompt(question,model_resp,gold_resp,rev)
         text = self.generate_judge_response(prompt)
-        logger.info("Judge Response:\n%s", text)
+        # logger.info("Judge Response:\n%s", text)
         
         lines = text.splitlines()
         if not lines:
@@ -256,17 +269,33 @@ class LNRSEvaluator:
 
         return model_score, gold_score
     
-    def calculate_lnrs(self, results, tau = 1.0):
+    def calculate_lnrs(self, results, tau = 100.0):
         T = len(results)
         model_score_sum = sum(result["model_score"] for result in results)
         gold_score_sum = sum(result["gold_score"] for result in results)
         model_length_sum = sum(result["model_length"] for result in results)
         gold_length_sum = sum(result["gold_length"] for result in results)
 
+        avg_model_length = model_length_sum /T
+        avg_gold_length = gold_length_sum /T
+
         relative_score = (model_score_sum/gold_score_sum if gold_score_sum > 0 else 0)
         length_diff = (gold_length_sum - model_length_sum)
         lf = 1/ ( 1+ np.exp(-length_diff / (tau * T)))
         lnrs = relative_score*lf    
+
+        logger.info("========== LNRS Statistics ==========")
+        logger.info("Samples: %d", T)
+        logger.info("Average model length: %.3f", avg_model_length)
+        logger.info("Average gold length: %.3f", avg_gold_length)
+        logger.info("Model score sum: %.3f", model_score_sum)
+        logger.info("Gold score sum: %.3f", gold_score_sum)
+        logger.info("Relative score: %.6f", relative_score)
+        logger.info("Length difference: %.3f", length_diff)
+        logger.info("Length factor: %.6f", lf)
+        logger.info("LNRS: %.6f", lnrs)
+        logger.info("====================================")
+
 
         return lnrs
 
@@ -291,7 +320,7 @@ class LNRSEvaluator:
         return (
             f"Utterance: {data['utterance']}\n"
             f"Response: {data['response']}\n"
-            f"Does the response imply that the answer to the utterance is yes or no?\n"
+            f"Does the response imply that the answer to the utterance is yes or no? Only answer with yes or no.\n"
             f"Answer:"
         )
 
@@ -312,24 +341,24 @@ class LNRSEvaluator:
                 **evaluation
             })
 
-        for result in results[:5]:
-            logger.info(
-                "\nID: %s"
-                "\nPROMPT:\n%s"
-                "\nGOLD ANSWER: %s"
-                "\nMODEL ANSWER: %s"
-                "\nGOLD SCORE: %f"
-                "\nMODEL SCORE: %f"
+        # for result in results[:5]:
+        #     logger.info(
+        #         "\nID: %s"
+        #         "\nPROMPT:\n%s"
+        #         "\nGOLD ANSWER: %s"
+        #         "\nMODEL ANSWER: %s"
+        #         "\nGOLD SCORE: %f"
+        #         "\nMODEL SCORE: %f"
                 
-                "\n--------------------------------",
-                result["id"],
-                result["prompt"],
-                result["gold_answer"],
-                result["model_answer"],
-                result["gold_score"],
-                result["model_score"]
+        #         "\n--------------------------------",
+        #         result["id"],
+        #         result["prompt"],
+        #         result["gold_answer"],
+        #         result["model_answer"],
+        #         result["gold_score"],
+        #         result["model_score"]
                 
-            )
+        #     )
         return results
 
     def build_pragmega_prompt(self,data):
@@ -390,26 +419,24 @@ class LNRSEvaluator:
                     **evaluation
                 })
 
-                total += 1
-
         logger.info("Total LNRS samples: %d", total)
 
-        for result in results[:5]:
-            logger.info(
-                "\nItem ID: %s"
-                "\nPROMPT:\n%s"
-                "\nGOLD ANSWER: %s"
-                "\nMODEL ANSWER: %s"
-                "\nGOLD SCORE: %f"
-                "\nMODEL SCORE: %f"
-                "\n--------------------------------",
-                result["item_id"],
-                result["prompt"],
-                result["gold_answer"],
-                result["model_answer"],
-                result["gold_score"],
-                result["model_score"]
-            )
+        # for result in results[:5]:
+        #     logger.info(
+        #         "\nItem ID: %s"
+        #         "\nPROMPT:\n%s"
+        #         "\nGOLD ANSWER: %s"
+        #         "\nMODEL ANSWER: %s"
+        #         "\nGOLD SCORE: %f"
+        #         "\nMODEL SCORE: %f"
+        #         "\n--------------------------------",
+        #         result["item_id"],
+        #         result["prompt"],
+        #         result["gold_answer"],
+        #         result["model_answer"],
+        #         result["gold_score"],
+        #         result["model_score"]
+        #     )
         return results
 
 
@@ -443,20 +470,20 @@ class LNRSEvaluator:
 
         logger.info("Total Social_IQA samples: %d", total)
         
-        for result in results[:5]:
-            logger.info(
-                "\nPROMPT:\n%s"
-                "\nGOLD ANSWER: %s"
-                "\nMODEL ANSWER: %s"
-                "\nGOLD SCORE: %f"
-                "\nMODEL SCORE: %f"
-                "\n--------------------------------",
-                result["prompt"],
-                result["gold_answer"],
-                result["model_answer"],
-                result["gold_score"],
-                result["model_score"]
-            )
+        # for result in results[:5]:
+        #     logger.info(
+        #         "\nPROMPT:\n%s"
+        #         "\nGOLD ANSWER: %s"
+        #         "\nMODEL ANSWER: %s"
+        #         "\nGOLD SCORE: %f"
+        #         "\nMODEL SCORE: %f"
+        #         "\n--------------------------------",
+        #         result["prompt"],
+        #         result["gold_answer"],
+        #         result["model_answer"],
+        #         result["gold_score"],
+        #         result["model_score"]
+        #     )
         return results
 
 if __name__ == "__main__":
