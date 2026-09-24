@@ -35,7 +35,7 @@ class LNRSEvaluator:
         self.judge_model_names = judge_model_names or [
             "Qwen/Qwen2.5-7B-Instruct",
             "mistralai/Mistral-7B-Instruct-v0.3",
-            "google/gemma-7b"
+            "google/gemma-1.1-7b-it"
         ]
 
         self.tokenizer = None
