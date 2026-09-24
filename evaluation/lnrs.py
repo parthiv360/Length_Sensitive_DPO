@@ -515,7 +515,7 @@ if __name__ == "__main__":
     baseline = Baseline(model_name=args.model_name, dataset_name=args.dataset_name)
     baseline.load_dataset()
     dataset = baseline.dataset
-    evaluator = LNRSEvaluator(model_name=args.model_name, judge_model_names=["Qwen/Qwen2.5-32B-Instruct"])
+    evaluator = LNRSEvaluator(model_name=args.model_name, judge_model_names=None)
     evaluator.load_model()
     evaluator.load_judge_model()
 
