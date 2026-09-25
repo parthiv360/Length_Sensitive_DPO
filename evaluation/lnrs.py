@@ -33,9 +33,9 @@ class LNRSEvaluator:
         self.model_name = model_name
         self.max_length = max_length
         self.judge_model_names = judge_model_names or [
-            "Qwen/Qwen2.5-7B-Instruct",
-            "mistralai/Mistral-7B-Instruct-v0.3",
-            "google/gemma-1.1-7b-it"
+            "Qwen/Qwen2.5-32B-Instruct",
+            # "mistralai/Mistral-7B-Instruct-v0.3",
+            # "google/gemma-1.1-7b-it"
         ]
 
         self.tokenizer = None
