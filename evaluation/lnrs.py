@@ -263,8 +263,8 @@ class LNRSEvaluator:
         if first_score is None or second_score is None:
             all_numbers = re.findall(r"\d+(?:\.\d+)?", text)
             if len(all_numbers)>=2:
-                first_score = float(numbers[0])
-                second_score = float(numbers[1])
+                first_score = float(all_numbers[0])
+                second_score = float(all_numbers[1])
             else:
                 raise ValueError("Judge %s failed to output scores. Raw output:\n%s", judge, text)
 
