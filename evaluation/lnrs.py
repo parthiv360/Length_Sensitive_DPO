@@ -251,14 +251,22 @@ class LNRSEvaluator:
         if not lines:
             raise ValueError("Judge response is empty")
 
-        first_line = lines[0].strip()
-        numbers = re.findall(r"\d+(?:\.\d+)?",first_line)
+        first_score, second_score = None, None
 
-        if len(numbers) < 2:
-            raise ValueError("Could not find two numeric scores in the judge response")
+        for line in lines:
+            numbers = re.findall(r"\d+(?:\.\d+)?", line)
+            if len(numbers) >=2:
+                first_score = float(numbers[0])
+                second_score = float(numbers[1])
+                break
 
-        first_score = float(numbers[0])
-        second_score = float(numbers[1])
+        if first_score is None or second_score is None:
+            all_numbers = re.findall(r"\d+(?:\.\d+)?", text)
+            if len(all_numbers)>=2:
+                first_score = float(numbers[0])
+                second_score = float(numbers[1])
+            else:
+                raise ValueError("Judge %s failed to output scores. Raw output:\n%s", judge, text)
 
         if not( 1 <= first_score <= 10) or not (1 <= second_score <= 10):
             raise ValueError("Scores are out of the expected range of 1 to 10")
