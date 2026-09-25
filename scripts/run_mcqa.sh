@@ -44,7 +44,7 @@ echo "=========================================="
 #     --dataset-name "lm-pragmatics"
 
 "$CONDA_PYTHON" -m "$MODULE_NAME" \
-    --model-name "ls_dpo_model_output/llama-2-13b-chat" \
+    --model-name "sft_model_output/llama-2-13b-chat" \
     --dataset-name "lm-pragmatics"
 
 # "$CONDA_PYTHON" -m "$MODULE_NAME" \
