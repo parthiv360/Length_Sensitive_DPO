@@ -266,10 +266,10 @@ class LNRSEvaluator:
                 first_score = float(all_numbers[0])
                 second_score = float(all_numbers[1])
             else:
-                raise ValueError("Judge %s failed to output scores. Raw output:\n%s", judge, text)
+                raise ValueError("2 numbers not found in judge %s output. Output:\n%s", judge, text)
 
         if not( 1 <= first_score <= 10) or not (1 <= second_score <= 10):
-            raise ValueError("Scores are out of the expected range of 1 to 10")
+            raise ValueError("Scores are out of the range of 1 to 10")
 
         if not rev:
             model_score = first_score
