@@ -74,7 +74,7 @@ echo "=========================================="
 #     --dataset-name "allenai/social_i_qa"
 
 "$CONDA_PYTHON" -m "$MODULE_NAME" \
-    --model-name "dpo_model_output/llama-2-13b-chat" \
+    --model-name "sft_model_output/llama-2-13b-chat" \
     --dataset-name "UCL-DARK/ludwig"
 
 # "$CONDA_PYTHON" -m "$MODULE_NAME" \
