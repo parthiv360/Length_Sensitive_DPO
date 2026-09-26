@@ -69,13 +69,13 @@ echo "=========================================="
 #     --model-name "ls_dpo_model_output/llama-2-7b-chat" \
 #     --dataset-name "UCL-DARK/ludwig"
 
-"$CONDA_PYTHON" -m "$MODULE_NAME" \
-    --model-name "meta-llama/Llama-2-13b-chat-hf" \
-    --dataset-name "allenai/social_i_qa"
-
 # "$CONDA_PYTHON" -m "$MODULE_NAME" \
-#     --model-name "dpo_model_output/llama-2-13b-chat" \
-#     --dataset-name "lm-pragmatics"
+#     --model-name "meta-llama/Llama-2-13b-chat-hf" \
+#     --dataset-name "allenai/social_i_qa"
+
+"$CONDA_PYTHON" -m "$MODULE_NAME" \
+    --model-name "dpo_model_output/llama-2-13b-chat" \
+    --dataset-name "UCL-DARK/ludwig"
 
 # "$CONDA_PYTHON" -m "$MODULE_NAME" \
 #     --model-name "sft_model_output/llama-2-13b-chat" \
