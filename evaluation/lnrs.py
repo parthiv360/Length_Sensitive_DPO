@@ -29,16 +29,20 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 class LNRSEvaluator:
-    def __init__(self, model_name:str,max_length:int=512, judge_model_name: str = "Qwen/Qwen2.5-32B-Instruct",):
+    def __init__(self, model_name:str,max_length:int=512, judge_model_names: list = ["Qwen/Qwen2.5-32B-Instruct"],):
         self.model_name = model_name
         self.max_length = max_length
-        self.judge_model_name = judge_model_name
+        self.judge_model_names = judge_model_names or [
+            "Qwen/Qwen2.5-7B-Instruct",
+            "mistralai/Mistral-7B-Instruct-v0.3",
+            "google/gemma-1.1-7b-it"
+        ]
 
         self.tokenizer = None
         self.model = None
 
-        self.judge_tokenizer = None
-        self.judge_model = None
+        self.judge_tokenizers = {}
+        self.judge_models = {}
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     def load_model(self):
@@ -67,20 +71,28 @@ class LNRSEvaluator:
         """
         Load the judge model and tokenizer.
         """
-        logger.info("Loading judge model and tokenizer: %s", self.judge_model_name)
-        self.judge_tokenizer = AutoTokenizer.from_pretrained(self.judge_model_name)
+        
+        for judge in self.judge_model_names:
+            logger.info("Loading judge model and tokenizer: %s", judge)
+            tokenizer = AutoTokenizer.from_pretrained(judge)
+            model = AutoModelForCausalLM.from_pretrained(
+                judge,
+                torch_dtype = torch.bfloat16,
+                device_map = "auto"
+            )
 
-        self.judge_model = AutoModelForCausalLM.from_pretrained(
-            self.judge_model_name,
-            torch_dtype=torch.bfloat16,
-            device_map="auto",
-        )
+            model.eval()
+            self.judge_tokenizers[judge]= tokenizer
+            self.judge_models[judge]= model
+            logger.info("Judge model %s loaded successfully", judge)
 
-        self.judge_model.eval()
-        logger.info("Judge model and tokenizer loaded successfully")
 
     @torch.no_grad()
-    def generate_judge_response(self, prompt, max_new_tokens: int = 128):
+    def generate_judge_response(self, prompt, judge, max_new_tokens: int = 128):
+
+        tokenizer = self.judge_tokenizers[judge]
+        model = self.judge_models[judge]
+
         messages = [
             {
                 "role": "user",
@@ -88,34 +100,34 @@ class LNRSEvaluator:
             }
         ]
 
-        text = self.judge_tokenizer.apply_chat_template(
+        text = tokenizer.apply_chat_template(
             messages,
             tokenize=False,
             add_generation_prompt=True,
         )
 
-        inputs = self.judge_tokenizer(
+        inputs = tokenizer(
             text,
             return_tensors="pt",
         )
 
-        judge_device = self.judge_model.get_input_embeddings().weight.device
+        judge_device = model.get_input_embeddings().weight.device
 
         inputs = {
             key: value.to(judge_device)
             for key, value in inputs.items()
         }
 
-        outputs = self.judge_model.generate(
+        outputs = model.generate(
             **inputs,
             max_new_tokens=max_new_tokens,
             do_sample=False,
-            pad_token_id=self.judge_tokenizer.eos_token_id,
+            pad_token_id=tokenizer.eos_token_id,
         )
 
         generated_tokens = outputs[0][inputs["input_ids"].shape[1]:]
 
-        response = self.judge_tokenizer.decode(
+        response = tokenizer.decode(
             generated_tokens,
             skip_special_tokens=True,
         ).strip()
@@ -229,27 +241,35 @@ class LNRSEvaluator:
         reference.
         """
 
-    def judge_response(self, question, gold_resp, model_resp, rev=False):
+    def judge_response(self, question, gold_resp, model_resp, judge, rev=False):
         
         prompt = self.build_judge_prompt(question,model_resp,gold_resp,rev)
-        text = self.generate_judge_response(prompt)
+        text = self.generate_judge_response(prompt,judge)
         # logger.info("Judge Response:\n%s", text)
         
         lines = text.splitlines()
         if not lines:
             raise ValueError("Judge response is empty")
 
-        first_line = lines[0].strip()
-        numbers = re.findall(r"\d+(?:\.\d+)?",first_line)
+        first_score, second_score = None, None
 
-        if len(numbers) < 2:
-            raise ValueError("Could not find two numeric scores in the judge response")
+        for line in lines:
+            numbers = re.findall(r"\d+(?:\.\d+)?", line)
+            if len(numbers) >=2:
+                first_score = float(numbers[0])
+                second_score = float(numbers[1])
+                break
 
-        first_score = float(numbers[0])
-        second_score = float(numbers[1])
+        if first_score is None or second_score is None:
+            all_numbers = re.findall(r"\d+(?:\.\d+)?", text)
+            if len(all_numbers)>=2:
+                first_score = float(all_numbers[0])
+                second_score = float(all_numbers[1])
+            else:
+                raise ValueError("2 numbers not found in judge %s output. Output:\n%s", judge, text)
 
-        if not( 1 <= first_score <= 10) or not (1 <= second_score <= 10):
-            raise ValueError("Scores are out of the expected range of 1 to 10")
+        first_score = max(1.0, min(10.0, float(first_score)))
+        second_score = max(1.0, min(10.0, float(second_score)))
 
         if not rev:
             model_score = first_score
@@ -262,12 +282,20 @@ class LNRSEvaluator:
 
 
     def get_judge_score(self, question, gold_resp, model_resp):
-        model_score_1, gold_score_1 = self.judge_response(question,gold_resp,model_resp,False)
-        model_score_2, gold_score_2 = self.judge_response(question, gold_resp, model_resp,True)
-        model_score = (model_score_1+model_score_2)/2
-        gold_score = (gold_score_1+gold_score_2)/2
+        tot_model_scores = []
+        tot_gold_scores = []
 
-        return model_score, gold_score
+        for judge in self.judge_model_names:
+            model_score_1, gold_score_1 = self.judge_response(question,gold_resp,model_resp,judge,False)
+            model_score_2, gold_score_2 = self.judge_response(question, gold_resp, model_resp,judge,True)
+            model_score = (model_score_1+model_score_2)/2
+            gold_score = (gold_score_1+gold_score_2)/2
+            tot_model_scores.append(model_score)
+            tot_gold_scores.append(gold_score)
+
+        final_model_score = sum(tot_model_scores)/len(tot_model_scores)
+        final_gold_score = sum(tot_gold_scores)/len(tot_gold_scores)
+        return final_model_score, final_gold_score
     
     def calculate_lnrs(self, results, tau = 100.0):
         T = len(results)
@@ -495,7 +523,7 @@ if __name__ == "__main__":
     baseline = Baseline(model_name=args.model_name, dataset_name=args.dataset_name)
     baseline.load_dataset()
     dataset = baseline.dataset
-    evaluator = LNRSEvaluator(model_name=args.model_name, judge_model_name="Qwen/Qwen2.5-32B-Instruct")
+    evaluator = LNRSEvaluator(model_name=args.model_name, judge_model_names=None)
     evaluator.load_model()
     evaluator.load_judge_model()
 
